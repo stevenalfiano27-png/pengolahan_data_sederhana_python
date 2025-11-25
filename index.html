@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belajar Data & Visualisasi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lesson-card {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .lesson-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .spreadsheet {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+        }
+
+        .quiz-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .question {
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .question h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            margin: 15px 0;
+        }
+
+        .option {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e7e9fc;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .result.show {
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .score-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .data-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Data & Visualisasi</h1>
+            <p class="subtitle">Belajar Pengolahan Data dengan Spreadsheet & Python</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showSection('materi')">📚 Materi</button>
+            <button class="tab" onclick="showSection('spreadsheet')">📈 Spreadsheet</button>
+            <button class="tab" onclick="showSection('python')">🐍 Python</button>
+            <button class="tab" onclick="showSection('visualisasi')">📊 Visualisasi</button>
+            <button class="tab" onclick="showSection('quiz')">🎯 Quiz</button>
+        </div>
+
+        <div class="content">
+            <!-- Materi Section -->
+            <div id="materi" class="section active">
+                <h2>Pengantar Data & Visualisasi</h2>
+                
+                <div class="lesson-card">
+                    <h3>Apa itu Data?</h3>
+                    <p>Data adalah kumpulan informasi yang dapat diproses dan dianalisis. Data dapat berupa angka, teks, gambar, atau bentuk lainnya. Dalam pengolahan data, kita mengubah data mentah menjadi informasi yang bermakna.</p>
+                </div>
+
+                <div class="lesson-card">
+                    <h3>Jenis-Jenis Data</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Data Kuantitatif:</strong> Data berupa angka (contoh: usia, tinggi badan, harga)</li>
+                        <li><strong>Data Kualitatif:</strong> Data berupa kategori (contoh: warna, jenis kelamin, kota)</li>
+                        <li><strong>Data Diskrit:</strong> Data yang dapat dihitung (contoh: jumlah siswa)</li>
+                        <li><strong>Data Kontinu:</strong> Data yang dapat diukur (contoh: berat badan, suhu)</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card">
+                    <h3>Statistik Deskriptif</h3>
+                    <p>Statistik deskriptif adalah metode untuk merangkum dan mendeskripsikan data:</p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Mean (Rata-rata):</strong> Jumlah semua nilai dibagi jumlah data</li>
+                        <li><strong>Median:</strong> Nilai tengah setelah data diurutkan</li>
+                        <li><strong>Modus:</strong> Nilai yang paling sering muncul</li>
+                        <li><strong>Range:</strong> Selisih antara nilai maksimum dan minimum</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Spreadsheet Section -->
+            <div id="spreadsheet" class="section">
+                <h2>Pengolahan Data dengan Spreadsheet</h2>
+                
+                <div class="interactive-demo">
+                    <h3>Demo Interaktif: Hitung Statistik</h3>
+                    <p>Masukkan data nilai siswa dan lihat hasil perhitungan statistiknya:</p>
+                    
+                    <div class="data-input">
+                        <div class="input-group">
+                            <label>Nilai 1:</label>
+                            <input type="number" id="val1" value="75">
+                        </div>
+                        <div class="input-group">
+                            <label>Nilai 2:</label>
+                            <input type="number" id="val2" value="80">
+                        </div>
+                        <div class="input-group">
+                            <label>Nilai 3:</label>
+                            <input type="number" id="val3" value="85">
+                        </div>
+                        <div class="input-group">
+                            <label>Nilai 4:</label>
+                            <input type="number" id="val4" value="90">
+                        </div>
+                        <div class="input-group">
+                            <label>Nilai 5:</label>
+                            <input type="number" id="val5" value="78">
+                        </div>
+                    </div>
+                    
+                    <button onclick="calculateStats()">Hitung Statistik</button>
+                    
+                    <div class="stats-display" id="statsDisplay"></div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3>Formula Spreadsheet Umum</h3>
+                    <div class="code-example">
+=SUM(A1:A10)      // Menjumlahkan data A1 sampai A10
+=AVERAGE(A1:A10)  // Menghitung rata-rata
+=MAX(A1:A10)      // Mencari nilai maksimum
+=MIN(A1:A10)      // Mencari nilai minimum
+=COUNT(A1:A10)    // Menghitung jumlah data
+                    </div>
+                </div>
+            </div>
+
+            <!-- Python Section -->
+            <div id="python" class="section">
+                <h2>Pengolahan Data dengan Python</h2>
+                
+                <div class="lesson-card">
+                    <h3>Library Python untuk Data</h3>
+                    <p><strong>Pandas:</strong> Library untuk manipulasi dan analisis data</p>
+                    <div class="code-example">
+import pandas as pd
+
+# Membuat DataFrame
+data = {
+    'Nama': ['Ani', 'Budi', 'Citra', 'Doni'],
+    'Nilai': [85, 90, 78, 92]
+}
+df = pd.DataFrame(data)
+
+# Menghitung statistik
+print(df['Nilai'].mean())    # Rata-rata
+print(df['Nilai'].median())  # Median
+print(df['Nilai'].max())     # Nilai maksimum
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3>Contoh Analisis Data Sederhana</h3>
+                    <div class="code-example">
+import numpy as np
+
+# Data nilai siswa
+nilai = [75, 80, 85, 90, 78, 88, 92, 76, 84, 87]
+
+# Statistik deskriptif
+mean = np.mean(nilai)
+median = np.median(nilai)
+std = np.std(nilai)
+
+print(f"Rata-rata: {mean}")
+print(f"Median: {median}")
+print(f"Standar Deviasi: {std}")
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualisasi Section -->
+            <div id="visualisasi" class="section">
+                <h2>Visualisasi Data</h2>
+                
+                <div class="lesson-card">
+                    <h3>Jenis-Jenis Grafik</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Bar Chart:</strong> Membandingkan data kategori</li>
+                        <li><strong>Line Chart:</strong> Menampilkan tren data dari waktu ke waktu</li>
+                        <li><strong>Pie Chart:</strong> Menampilkan proporsi bagian dari keseluruhan</li>
+                        <li><strong>Scatter Plot:</strong> Menampilkan hubungan antara dua variabel</li>
+                    </ul>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3>Visualisasi Interaktif</h3>
+                    <p>Grafik nilai siswa berdasarkan data yang dimasukkan:</p>
+                    <div class="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                    <button onclick="updateChart()">Update Grafik</button>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz" class="section">
+                <h2>🎯 Quiz: Uji Pemahaman Anda</h2>
+                
+                <div class="quiz-container">
+                    <div class="question">
+                        <h4>1. Apa yang dimaksud dengan Mean (rata-rata)?</h4>
+                        <div class="options">
+                            <div class="option" onclick="selectAnswer(1, 1)">A. Nilai tengah dari data yang diurutkan</div>
+                            <div class="option" onclick="selectAnswer(1, 2)">B. Jumlah semua nilai dibagi jumlah data</div>
+                            <div class="option" onclick="selectAnswer(1, 3)">C. Nilai yang paling sering muncul</div>
+                            <div class="option" onclick="selectAnswer(1, 4)">D. Selisih nilai maksimum dan minimum</div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h4>2. Library Python yang paling populer untuk analisis data adalah?</h4>
+                        <div class="options">
+                            <div class="option" onclick="selectAnswer(2, 1)">A. NumPy</div>
+                            <div class="option" onclick="selectAnswer(2, 2)">B. Pandas</div>
+                            <div class="option" onclick="selectAnswer(2, 3)">C. Matplotlib</div>
+                            <div class="option" onclick="selectAnswer(2, 4)">D. TensorFlow</div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h4>3. Jenis grafik yang tepat untuk menampilkan tren data dari waktu ke waktu adalah?</h4>
+                        <div class="options">
+                            <div class="option" onclick="selectAnswer(3, 1)">A. Pie Chart</div>
+                            <div class="option" onclick="selectAnswer(3, 2)">B. Bar Chart</div>
+                            <div class="option" onclick="selectAnswer(3, 3)">C. Line Chart</div>
+                            <div class="option" onclick="selectAnswer(3, 4)">D. Scatter Plot</div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h4>4. Formula spreadsheet untuk menjumlahkan data A1 sampai A10 adalah?</h4>
+                        <div class="options">
+                            <div class="option" onclick="selectAnswer(4, 1)">A. =SUM(A1:A10)</div>
+                            <div class="option" onclick="selectAnswer(4, 2)">B. =TOTAL(A1:A10)</div>
+                            <div class="option" onclick="selectAnswer(4, 3)">C. =ADD(A1:A10)</div>
+                            <div class="option" onclick="selectAnswer(4, 4)">D. =COUNT(A1:A10)</div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h4>5. Data yang berupa kategori (bukan angka) disebut?</h4>
+                        <div class="options">
+                            <div class="option" onclick="selectAnswer(5, 1)">A. Data Kuantitatif</div>
+                            <div class="option" onclick="selectAnswer(5, 2)">B. Data Kualitatif</div>
+                            <div class="option" onclick="selectAnswer(5, 3)">C. Data Kontinu</div>
+                            <div class="option" onclick="selectAnswer(5, 4)">D. Data Diskrit</div>
+                        </div>
+                    </div>
+
+                    <button onclick="submitQuiz()">Submit Quiz</button>
+                    <div id="quizResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            const tabs = document.querySelectorAll('.tab');
+            
+            sections.forEach(section => section.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Calculate Statistics
+        function calculateStats() {
+            const values = [
+                parseFloat(document.getElementById('val1').value),
+                parseFloat(document.getElementById('val2').value),
+                parseFloat(document.getElementById('val3').value),
+                parseFloat(document.getElementById('val4').value),
+                parseFloat(document.getElementById('val5').value)
+            ];
+
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / values.length;
+            const sortedValues = [...values].sort((a, b) => a - b);
+            const median = sortedValues[Math.floor(sortedValues.length / 2)];
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const range = max - min;
+
+            const statsHTML = `
+                <div class="stat-card">
+                    <h4>Rata-rata</h4>
+                    <div class="value">${mean.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Median</h4>
+                    <div class="value">${median}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Maksimum</h4>
+                    <div class="value">${max}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Minimum</h4>
+                    <div class="value">${min}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Range</h4>
+                    <div class="value">${range}</div>
+                </div>
+            `;
+
+            document.getElementById('statsDisplay').innerHTML = statsHTML;
+        }
+
+        // Chart
+        let myChart;
+
+        function createChart() {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const values = [
+                parseFloat(document.getElementById('val1').value),
+                parseFloat(document.getElementById('val2').value),
+                parseFloat(document.getElementById('val3').value),
+                parseFloat(document.getElementById('val4').value),
+                parseFloat(document.getElementById('val5').value)
+            ];
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Siswa 1', 'Siswa 2', 'Siswa 3', 'Siswa 4', 'Siswa 5'],
+                    datasets: [{
+                        label: 'Nilai',
+                        data: values,
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)',
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)',
+                            'rgba(102, 126, 234, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)',
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)',
+                            'rgba(102, 126, 234, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const values = [
+                parseFloat(document.getElementById('val1').value),
+                parseFloat(document.getElementById('val2').value),
+                parseFloat(document.getElementById('val3').value),
+                parseFloat(document.getElementById('val4').value),
+                parseFloat(document.getElementById('val5').value)
+            ];
+
+            myChart.data.datasets[0].data = values;
+            myChart.update();
+        }
+
+        // Quiz System
+        const answers = {};
+        const correctAnswers = {
+            1: 2,  // B
+            2: 2,  // B
+            3: 3,  // C
+            4: 1,  // A
+            5: 2   // B
+        };
+
+        function selectAnswer(questionNum, answerNum) {
+            answers[questionNum] = answerNum;
+            
+            const question = event.target.closest('.question');
+            const options = question.querySelectorAll('.option');
+            
+            options.forEach(option => option.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function submitQuiz() {
+            if (Object.keys(answers).length < 5) {
+                alert('Mohon jawab semua pertanyaan terlebih dahulu!');
+                return;
+            }
+
+            let score = 0;
+            const questions = document.querySelectorAll('.question');
+            
+            questions.forEach((question, index) => {
+                const questionNum = index + 1;
+                const options = question.querySelectorAll('.option');
+                const userAnswer = answers[questionNum];
+                const correctAnswer = correctAnswers[questionNum];
+                
+                options.forEach((option, optIndex) => {
+                    if (optIndex + 1 === correctAnswer) {
+                        option.classList.add('correct');
+                    } else if (optIndex + 1 === userAnswer && userAnswer !== correctAnswer) {
+                        option.classList.add('incorrect');
+                    }
+                });
+                
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+
+            const percentage = (score / 5) * 100;
+            let resultClass = 'score-low';
+            let resultText = 'Perlu belajar lebih giat!';
+            
+            if (percentage >= 80) {
+                resultClass = 'score-good';
+                resultText = 'Luar biasa! Anda sangat menguasai materi!';
+            } else if (percentage >= 60) {
+                resultClass = 'score-medium';
+                resultText = 'Bagus! Masih ada ruang untuk perbaikan.';
+            }
+
+            const resultHTML = `
+                <div class="result ${resultClass} show">
+                    <p>Skor Anda: ${score} / 5 (${percentage}%)</p>
+                    <p>${resultText}</p>
+                </div>
+            `;
+
+            document.getElementById('quizResult').innerHTML = resultHTML;
+        }
+
+        // Initialize
+        window.onload = function() {
+            calculateStats();
+            createChart();
+        };
+    </script>
+</body>
+</html>
